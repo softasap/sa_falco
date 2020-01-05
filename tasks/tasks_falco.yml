@@ -85,6 +85,7 @@
       retries: 3
       register: result
       until: result is not failed
+      ignore_errors: true
       become: yes
       tags:
         - falco
