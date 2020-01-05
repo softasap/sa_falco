@@ -89,6 +89,15 @@
       tags:
         - falco
 
+    - name: Falco | Epel dependency
+      package:
+        name: epel-release
+        state: present
+      become: yes
+      register: result
+      until: result is succeeded
+      retries: 3
+
     - name: Falco | Install packages
       package:
         name:
@@ -104,3 +113,24 @@
         - falco
 
     when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+  - name: Falco | Template root config
+    template:
+      src: "{{ falco_root_config_template }}"
+      dest: "/etc/falco/falco.yaml"
+    become: yes
+    tags:
+      - falco
+
+  - name: Falco | Enable service
+    service:
+      name: falco
+      state: started
+      enabled: yes
+    retries: 3
+    register: result
+    until: result is not failed
+    when: docker_test is not defined
+    become: yes
+    tags:
+      - falco

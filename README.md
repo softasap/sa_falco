@@ -11,7 +11,8 @@ Simple
 ```YAML
 
      - {
-         role: "sa_falco"
+         role: "sa_falco",
+         falco_root_config_template: templates/falco.yml.j2
        }
 
 
@@ -23,7 +24,8 @@ Advanced
 
 roles:
      - {
-         role: "sa_falco"
+         role: "sa_falco",
+         falco_root_config_template: templates/falco.yml.j2
        }
 
 
