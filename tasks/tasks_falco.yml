@@ -23,13 +23,14 @@
       tags:
         - falco
 
-    - name: Falco | Install kernel packages
+    - name: Falco | Install kernel packages (if available)
       package:
         name: "linux-headers-{{ ansible_kernel }}"
         state: present
       retries: 3
       register: result
       until: result is not failed
+      ignore_errors: true
       become: yes
       tags:
         - falco
@@ -39,8 +40,6 @@
         name:
           - falco
           - jq
-          - mailutils
-          - sysdig-dkms
         state: present
       retries: 3
       register: result
@@ -55,7 +54,7 @@
 
     - name: Falco | Yum repository
       yum_repository:
-        name: falcosecurity-rpm 
+        name: falcosecurity-rpm
         description: falcosecurity-rpm - packages by falcosecurity
         baseurl: "https://dl.bintray.com/falcosecurity/rpm"
         gpgcheck: yes
@@ -79,7 +78,7 @@
       tags:
         - falco
 
-    - name: Falco | Install kernel packages
+    - name: Falco | Install kernel packages (if available)
       package:
         name: "kernel-devel-{{ ansible_kernel }}"
         state: present
@@ -103,9 +102,7 @@
     - name: Falco | Install packages
       package:
         name:
-        - dkms
         - falco
-        - sysdig
         state: present
       retries: 3
       register: result
