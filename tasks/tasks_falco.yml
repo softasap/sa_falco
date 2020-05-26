@@ -2,7 +2,7 @@
   - block:
 
     - name: Falco | Add GPG key to apt keyring
-      apt_key: url=https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public  state=present
+      apt_key: url=https://falco.org/repo/falcosecurity-3672BA8F.asc  state=present
       retries: 3
       register: result
       until: result is not failed
@@ -12,9 +12,10 @@
 
     - name: Falco | Add Debian apt repository
       apt_repository:
-        repo: "deb http://download.draios.com/stable/deb stable-$(ARCH)/"
+        repo: "deb https://dl.bintray.com/falcosecurity/deb stable main"
         state: present
         update_cache: yes
+        filename: falcosecurity
       retries: 3
       register: result
       until: result is not failed
@@ -22,13 +23,14 @@
       tags:
         - falco
 
-    - name: Falco | Install kernel packages
+    - name: Falco | Install kernel packages (if available)
       package:
         name: "linux-headers-{{ ansible_kernel }}"
         state: present
       retries: 3
       register: result
       until: result is not failed
+      ignore_errors: true
       become: yes
       tags:
         - falco
@@ -38,8 +40,6 @@
         name:
           - falco
           - jq
-          - mailutils
-          - sysdig-dkms
         state: present
       retries: 3
       register: result
@@ -54,11 +54,11 @@
 
     - name: Falco | Yum repository
       yum_repository:
-        name: Draios
-        description: Falco tool
-        baseurl: "http://download.draios.com/stable/rpm/$basearch"
+        name: falcosecurity-rpm
+        description: falcosecurity-rpm - packages by falcosecurity
+        baseurl: "https://dl.bintray.com/falcosecurity/rpm"
         gpgcheck: yes
-        gpgkey: "https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public"
+        gpgkey: "https://falco.org/repo/falcosecurity-3672BA8F.asc"
         enabled: yes
       retries: 3
       register: result
@@ -69,7 +69,7 @@
 
     - name: Falco | Enable Import RPM key
       rpm_key:
-        key: "https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public"
+        key: "https://falco.org/repo/falcosecurity-3672BA8F.asc"
         state: present
       retries: 3
       register: result
@@ -78,7 +78,7 @@
       tags:
         - falco
 
-    - name: Falco | Install kernel packages
+    - name: Falco | Install kernel packages (if available)
       package:
         name: "kernel-devel-{{ ansible_kernel }}"
         state: present
@@ -102,9 +102,7 @@
     - name: Falco | Install packages
       package:
         name:
-        - dkms
         - falco
-        - sysdig
         state: present
       retries: 3
       register: result
